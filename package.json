@@ -13,6 +13,9 @@
     "build:prod": "yarn run clean && yarn run build:wasm && webpack",
     "start": "cross-env NODE_ENV=development webpack serve --mode development"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "untar",
     "bzip2",
