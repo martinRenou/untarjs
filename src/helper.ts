@@ -1,10 +1,10 @@
-import unpackaging from "../lib/unpack";
-import unpackagingWasm from "../lib/unpack.wasm";
+import unpackaging from "./lib/unpack";
+import unpackagingWasm from "./lib/unpack.wasm";
 
 const initializeWasm = async () => {
     try {
         const wasmModule = await unpackaging({
-            locateFile(path) {
+            locateFile(path: string) {
                 console.log('path', path);
                 if (path.endsWith('.wasm')) {
                     return unpackagingWasm;
