@@ -1127,6 +1127,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@emscripten-forge/untarjs@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@emscripten-forge/untarjs@workspace:."
+  dependencies:
+    "@babel/core": ^7.21.0
+    "@babel/preset-env": ^7.21.0
+    assert: ^2.1.0
+    babel-loader: ^8.2.3
+    browserify-fs: ^1.0.0
+    buffer: ^6.0.3
+    cross-env: ^7.0.3
+    crypto-browserify: ^3.12.0
+    exports-loader: ^5.0.0
+    html-webpack-plugin: ^5.6.0
+    https-browserify: ^1.0.0
+    os-browserify: ^0.3.0
+    path-browserify: ^1.0.1
+    process: ^0.11.10
+    rimraf: ^3.0.2
+    stream-browserify: ^3.0.0
+    stream-http: ^3.2.0
+    tar-stream: ^3.1.7
+    url: ^0.11.4
+    v: ^0.3.0
+    vm-browserify: ^1.1.2
+    webpack: ^5.88.0
+    webpack-cli: ^4.10.0
+    webpack-dev-server: ^4.11.0
+  languageName: unknown
+  linkType: soft
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -6153,37 +6184,6 @@ __metadata:
   checksum: 4fa18d8d8d977c55cb09715385c203197105e10a6d220087ec819f50cb68870f02942244f1017565484237f1f8c5d3cd413631b1ae104d3096f24fdfde1b4aa2
   languageName: node
   linkType: hard
-
-"untarjs@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "untarjs@workspace:."
-  dependencies:
-    "@babel/core": ^7.21.0
-    "@babel/preset-env": ^7.21.0
-    assert: ^2.1.0
-    babel-loader: ^8.2.3
-    browserify-fs: ^1.0.0
-    buffer: ^6.0.3
-    cross-env: ^7.0.3
-    crypto-browserify: ^3.12.0
-    exports-loader: ^5.0.0
-    html-webpack-plugin: ^5.6.0
-    https-browserify: ^1.0.0
-    os-browserify: ^0.3.0
-    path-browserify: ^1.0.1
-    process: ^0.11.10
-    rimraf: ^3.0.2
-    stream-browserify: ^3.0.0
-    stream-http: ^3.2.0
-    tar-stream: ^3.1.7
-    url: ^0.11.4
-    v: ^0.3.0
-    vm-browserify: ^1.1.2
-    webpack: ^5.88.0
-    webpack-cli: ^4.10.0
-    webpack-dev-server: ^4.11.0
-  languageName: unknown
-  linkType: soft
 
 "update-browserslist-db@npm:^1.1.1":
   version: 1.1.1
