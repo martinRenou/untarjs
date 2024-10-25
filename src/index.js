@@ -1,77 +1,70 @@
 
-import initializeWasm from './helper';
 
-const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
-//const condaPackageUrl = "http://localhost:8888/_r-mutex-1.0.0-mro_2.conda";
+import initializeWasm from "./helper.js";
 
-
-export class Unpack {
-    constructor() {
-        this._wasmModule = null;
+const fetchByteArray = async (url) => {
+    let response = await fetch(url)
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
     }
+    let arrayBuffer = await response.arrayBuffer();
+    let byte_array = new Uint8Array(arrayBuffer);
+    return byte_array;
+}
 
-    async fetchByteArray(url) {
-        let response = await fetch(url)
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+const init = async () => {
+    return await initializeWasm();
+}
+
+const extractData = (data) => {
+    let extractedData;
+    const wasmModule = init();
+    try {
+        if (!wasmModule) {
+            throw new Error('WASM module not initialized.');
         }
-        let arrayBuffer = await response.arrayBuffer();
-        let byte_array = new Uint8Array(arrayBuffer);
-        return byte_array;
-    }
+        if (wasmModule) {
+            const inputPtr = wasmModule._malloc(data.length);
+            wasmModule.HEAPU8.set(data, inputPtr);
+            const outputSizePtr = wasmModule._malloc(data.length);
 
-    async _init() {
-        this._wasmModule = await initializeWasm();
-    }
+            const extractedDataPtr = wasmModule._extract_archive(inputPtr, data.length, outputSizePtr);
 
-    extractData(data) {
-        let extractedData;
-        this._init();
-        try {
-            if (!this._wasmModule) {
-                throw new Error('WASM module not initialized.');
+            const extractedSize = wasmModule.getValue(outputSizePtr, 'i32');
+
+            console.log('Extracted size:', extractedSize);
+
+            if (extractedDataPtr === 0) {
+                throw new Error('Archive extraction failed.');
             }
-            if (this._wasmModule) {
-                const inputPtr = this._wasmModule._malloc(data.length);
-                this._wasmModule.HEAPU8.set(data, inputPtr);
-                const outputSizePtr = this._wasmModule._malloc(data.length);
 
-                const extractedDataPtr = this._wasmModule._extract_archive(inputPtr, data.length, outputSizePtr);
+            extractedData = new Uint8Array(wasmModule.HEAPU8.subarray(extractedDataPtr, extractedDataPtr + extractedSize));
 
-                const extractedSize = this._wasmModule.getValue(outputSizePtr, 'i32');
+            wasmModule._free(inputPtr);
+            wasmModule._free(outputSizePtr);
+            wasmModule._free(extractedDataPtr);
 
-                console.log('Extracted size:', extractedSize);
-
-                if (extractedDataPtr === 0) {
-                    throw new Error('Archive extraction failed.');
-                }
-
-                extractedData = new Uint8Array(this._wasmModule.HEAPU8.subarray(extractedDataPtr, extractedDataPtr + extractedSize));
-
-                this._wasmModule._free(inputPtr);
-                this._wasmModule._free(outputSizePtr);
-                this._wasmModule._free(extractedDataPtr);
-
-                return extractedData;
-            }
-        } catch (error) {
-            console.log('Error during unpacking:', error);
+            return extractedData;
         }
-    }
-
-    async unpackCondaFileByUrl(url) {
-        let extractedData;
-        try {
-            let data = await this.fetchByteArray(url);
-            console.log('Data downloaded:', data);
-
-            extractedData = this.extractData(data);
-        } catch (error) {
-            console.error('Error during unpacking:', error);
-        }
-        return extractedData;
+    } catch (error) {
+        console.log('Error during extracting:', error);
     }
 }
 
-let test = new Unpack;
-test.unpackCondaFileByUrl(condaPackageUrl);
+const extract = async (url) => {
+    let extractedData;
+    try {
+        let data = await fetchByteArray(url);
+        console.log('Data downloaded:', data);
+
+        extractedData = extractData(data);
+    } catch (error) {
+        console.error('Error during extracting:', error);
+    }
+    return extractedData;
+}
+
+export default {
+    extract,
+    extractData
+}
