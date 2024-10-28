@@ -1,5 +1,5 @@
-import unpack, { WasmModule } from "./unpack.js";
-import unpackWasm from "../src/unpack.wasm";
+import unpack, { WasmModule } from "./unpack";
+import unpackWasm from "./unpack.wasm";
 
 const initializeWasm = async (): Promise<WasmModule | undefined> => {
     try {
