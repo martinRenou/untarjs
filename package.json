@@ -11,14 +11,14 @@
     "build:prod": "tsc && yarn run clean && yarn run build:wasm"
   },
   "files": [
-     "lib/index.js",
-     "lib/helper.js",
-     "lib/index.d.ts",
-     "lib/helper.d.ts",
-     "lib/unpack.js",
-     "lib/unpack.wasm",
-     "src/unpack.d.ts",
-     "src/unpack.wasm.d.ts"
+    "lib/index.js",
+    "lib/index.d.ts",
+    "lib/helper.js",
+    "lib/helper.ts",
+    "lib/unpack.wasm",
+    "lib/unpack.js",
+    "lib/unpack.d.ts",
+    "lib/unpack.wasm.d.ts"
   ],
   "publishConfig": {
     "access": "public"
@@ -31,12 +31,14 @@
   ],
   "author": "Anastasiia Sliusar",
   "license": "MIT",
-  
   "dependencies": {
     "assert": "^2.1.0",
     "process": "^0.11.10",
+    "rimraf": "^3.0.2",
     "typescript": "^5",
-    "url": "^0.11.4",
-    "rimraf": "^3.0.2"
+    "url": "^0.11.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.1"
   }
 }

@@ -1,5 +1,5 @@
 import initializeWasm from "./helper.js";
-import { WasmModule } from "./unpack";
+import { WasmModule } from "./unpack.js";
 
 const fetchByteArray = async (url: string): Promise<Uint8Array> => {
   const response = await fetch(url);
@@ -53,7 +53,6 @@ const extractData = async (data: Uint8Array): Promise<Uint8Array | null> => {
     return null;
   }
 };
-
 
 const extract = async (url: string): Promise<Uint8Array | null> => {
   try {

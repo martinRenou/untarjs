@@ -5,7 +5,7 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ENV_FOLDER="wasm-unpack-env"
 LIBS_FOLDER="libs"
-WASM_LIB="src/lib"
+WASM_LIB="src"
 
 if [ -d "$ENV_FOLDER" ]; then
     echo "Folder '$ENV_FOLDER' already exists."
