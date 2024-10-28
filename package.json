@@ -6,19 +6,12 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build:wasm": "node build_wasm.js",
-    "clean": "rimraf dist",
+    "clean": "rimraf lib",
     "build": "yarn run build:wasm && tsc",
     "build:prod": "tsc && yarn run clean && yarn run build:wasm"
   },
   "files": [
-    "lib/index.js",
-    "lib/index.d.ts",
-    "lib/helper.js",
-    "lib/helper.ts",
-    "lib/unpack.wasm",
-    "lib/unpack.js",
-    "lib/unpack.d.ts",
-    "lib/unpack.wasm.d.ts"
+    "lib/"
   ],
   "publishConfig": {
     "access": "public"
