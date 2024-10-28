@@ -25,20 +25,18 @@
   },
   "keywords": [
     "untarjs",
-    "unpack",
-    "jupyter",
-    "jupyterlab"
+    "unpack"
   ],
   "author": "Anastasiia Sliusar",
   "license": "MIT",
   "dependencies": {
     "assert": "^2.1.0",
     "process": "^0.11.10",
-    "rimraf": "^3.0.2",
-    "typescript": "^5",
     "url": "^0.11.4"
   },
   "devDependencies": {
-    "@types/node": "^22.8.1"
+    "@types/node": "^22.8.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^5"
   }
 }
