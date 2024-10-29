@@ -74,8 +74,6 @@ echo "Start of compiling unpack.c"
 
 if [ -d "$WASM_LIB" ]; then
     echo "Folder '$WASM_LIB' already exists."
-    echo "Cleaning lib folder for new .js and .wasm files"
-    rm -rf $WASM_LIB/*
 else
     echo "Folder '$WASM_LIB' does not exist. Creating it now..."
     mkdir "$WASM_LIB"
