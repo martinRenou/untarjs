@@ -6,9 +6,9 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build:wasm": "node build_wasm.js",
-    "clean": "rimraf lib",
-    "build": "yarn run build:wasm && tsc",
-    "build:prod": "tsc && yarn run clean && yarn run build:wasm"
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "build": "yarn run clean && tsc && yarn run build:wasm",
+    "build:prod": "yarn run clean && tsc && yarn run build:wasm"
   },
   "files": [
     "lib/"
