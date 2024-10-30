@@ -1,4 +1,4 @@
-## Unpack
+## Untarjs
 
 Fetching and unpacking conda packages. This package uses compiled `libarchive` into wasm and supports: tar, bzip2, zstd, zlib, zip, ustar, pax, v7, gnutar, cpio, mtree.
 
