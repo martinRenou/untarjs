@@ -1,0 +1,9 @@
+name: untarjs
+channels:
+  - conda-forge
+dependencies:
+  - cmake
+  - pip
+  - python
+  - yarn
+  - nodejs

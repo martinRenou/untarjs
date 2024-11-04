@@ -18,7 +18,8 @@
     "strictPropertyInitialization": false,
     "target": "es2017",
     "types": [
-      "node"
+      "node",
+      "jest"
     ],
     "skipLibCheck": true,
     "lib": [
