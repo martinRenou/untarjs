@@ -51,3 +51,9 @@ jobs:
           micromamba activate untarjs
 
           yarn run eslint
+      
+      - name: Run test
+        run: |
+          micromamba activate untarjs
+
+          yarn run test
