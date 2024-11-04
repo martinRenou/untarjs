@@ -33,8 +33,7 @@ jobs:
           environment-name: untarjs 
           condarc: |
             channels:
-              - https://repo.mamba.pm/emscripten-forge 
-              - conda-forge
+              - https://repo.mamba.pm/emscripten-forge
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
