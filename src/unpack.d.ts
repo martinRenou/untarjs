@@ -1,11 +1,13 @@
 export interface IWasmModule {
+  UTF8ToString(filenamePtr: number): string;
   HEAPU8: Uint8Array;
   _malloc(size: number): number;
   _free(ptr: number): void;
   _extract_archive(
     inputPtr: number,
     inputSize: number,
-    outputSizePtr: number
+    outputSizePtr: number,
+    fileCountPtr: number
   ): number;
   getValue(ptr: number, type: string): number;
 }
