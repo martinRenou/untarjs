@@ -1,4 +1,4 @@
 export interface IFileData {
-    filename: string;
-    data: Uint8Array;
-};
+  filename: string;
+  data: Uint8Array;
+}
