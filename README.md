@@ -7,16 +7,22 @@ Fetching and unpacking archives. This package uses compiled `libarchive` into wa
 ## Using
 
 This package has 2 methods:
-- extract(url) - downloads an archive throught the url and returns extracted data in Uint8Array.
-- exctractData(data) - accepts Uint8Array archive data and returns exracted data.
+- extract(url) - downloads an archive throught the url and returns extracted data int the array of objects where each of them has next structure:
+```
+{
+      "data":  new Uint8Array([5, 6, 7, 8]),
+      "filename": "info/paths.json"
+}
+```
+- exctractData(data) - accepts Uint8Array archive data and returns exracted data in the same format which `extract` method does.
 
 The example of using:
 ```sh
 import untarjs from "@emscripten-forge/untarjs";
 
 const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
-untarjs.extract(condaPackageUrl).then((data)=>{
-    console.log(data);
+untarjs.extract(condaPackageUrl).then((files)=>{
+    console.log(files);
 });
 ```
 > Note: If this package is used in the project where Webpack is used then webpack.config should include next:

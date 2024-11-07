@@ -15,8 +15,10 @@ jest.mock('../src/index', () => {
 describe('extract', () => {
   it('should download and extract data successfully', async () => {
     const mockData = new Uint8Array([1, 2, 3, 4]);
-    const extractedData = new Uint8Array([5, 6, 7, 8]);
-
+    const extractedData = {
+      data: new Uint8Array([5, 6, 7, 8]),
+      filename: "info/paths.json"
+    }
     const mockFetchByteArray = jest.fn().mockResolvedValue(mockData);
     const mockExtractData = jest.fn().mockResolvedValue(extractedData);
 

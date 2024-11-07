@@ -1,4 +1,5 @@
 import initializeWasm from './helper';
+import { IFileData } from './types';
 import { IWasmModule } from './unpack';
 
 const fetchByteArray = async (url: string): Promise<Uint8Array> => {
@@ -20,55 +21,66 @@ const init = async (): Promise<IWasmModule | null> => {
   }
 };
 
-const extractData = async (data: Uint8Array): Promise<Uint8Array | null> => {
+const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
   const wasmModule = await init();
-
   if (!wasmModule) {
     console.error('WASM module not initialized.');
-    return null;
+    return [];
   }
+  const inputPtr = wasmModule._malloc(data.length);
+  wasmModule.HEAPU8.set(data, inputPtr);
+  const fileCountPtr = wasmModule._malloc(4);
+  const outputSizePtr = wasmModule._malloc(4);
 
   try {
-    const inputPtr = wasmModule._malloc(data.length);
-    wasmModule.HEAPU8.set(data, inputPtr);
-
-    const outputSizePtr = wasmModule._malloc(data.length);
-    const extractedDataPtr = wasmModule._extract_archive(
+    const extractedFilesPtr = wasmModule._extract_archive(
       inputPtr,
       data.length,
-      outputSizePtr
+      outputSizePtr,
+      fileCountPtr
     );
-    const extractedSize = wasmModule.getValue(outputSizePtr, 'i32');
-    if (extractedDataPtr === 0) {
-      throw new Error('Archive extraction failed.');
+
+    const fileCount = wasmModule.getValue(fileCountPtr, 'i32');
+    const files: IFileData[] = [];
+
+    for (let i = 0; i < fileCount; i++) {
+      const fileDataPtr = extractedFilesPtr + i * (3 * 4);
+      const filenamePtr = wasmModule.getValue(fileDataPtr, 'i32');
+      const dataSize = wasmModule.getValue(fileDataPtr + 8, 'i32');
+      const dataPtr = wasmModule.getValue(fileDataPtr + 4, 'i32');
+      const filename = wasmModule.UTF8ToString(filenamePtr);
+      const fileData = new Uint8Array(
+        wasmModule.HEAPU8.buffer,
+        dataPtr,
+        dataSize
+      );
+
+      files.push({
+        filename: filename,
+        data: fileData
+      });
     }
-    const extractedData = new Uint8Array(
-      wasmModule.HEAPU8.subarray(
-        extractedDataPtr,
-        extractedDataPtr + extractedSize
-      )
-    );
 
-    wasmModule._free(inputPtr);
+    wasmModule._free(fileCountPtr);
     wasmModule._free(outputSizePtr);
-    wasmModule._free(extractedDataPtr);
+    wasmModule._free(inputPtr);
+    wasmModule._free(extractedFilesPtr);
 
-    console.log('Extracted size:', extractedSize);
-    return extractedData;
+    return files;
   } catch (error) {
     console.error('Error during extracting:', error);
-    return null;
+    return [];
   }
 };
 
-const extract = async (url: string): Promise<Uint8Array | null> => {
+const extract = async (url: string): Promise<IFileData[]> => {
   try {
     const data = await fetchByteArray(url);
     console.log('Data downloaded:', data);
     return await extractData(data);
   } catch (error) {
     console.error('Error during extracting:', error);
-    return null;
+    return [];
   }
 };
 
