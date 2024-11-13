@@ -87,3 +87,5 @@ export const initUntarJS = async (wasmPath?: string): Promise<IUnpackJSAPI> => {
 };
 
 export * from './types';
+
+export default initUntarJS;

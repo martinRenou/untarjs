@@ -1,4 +1,4 @@
-import { initUntarJS } from '../src/index';
+import initUntarJS from '../src/index';
 
 jest.mock('../src/helper', () => ({
   __esModule: true,
