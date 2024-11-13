@@ -1,23 +1,20 @@
 import unpack, { IWasmModule } from './unpack';
 import unpackWasm from './unpack.wasm';
 
-const initializeWasm = async (): Promise<IWasmModule | undefined> => {
+const initializeWasm = async (wasmPath: string | undefined): Promise<IWasmModule> => {
   try {
     const wasmModule: IWasmModule = await unpack({
       locateFile(path: string) {
         if (path.endsWith('.wasm')) {
-          return unpackWasm;
+          return wasmPath ? wasmPath : unpackWasm;
         }
         return path;
       }
     });
 
-    console.log('WASM module initialized:', wasmModule);
-
     return wasmModule;
   } catch (err) {
-    console.error('Error initializing the WASM module:', err);
-    return undefined;
+    throw new Error(`Error initializing the WASM module: ${err}`);
   }
 };
 export default initializeWasm;
