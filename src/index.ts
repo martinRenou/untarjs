@@ -21,7 +21,7 @@ const init = async (): Promise<IWasmModule | null> => {
   }
 };
 
-const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
+export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
   const wasmModule = await init();
   if (!wasmModule) {
     console.error('WASM module not initialized.');
@@ -73,7 +73,7 @@ const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
   }
 };
 
-const extract = async (url: string): Promise<IFileData[]> => {
+export const extract = async (url: string): Promise<IFileData[]> => {
   try {
     const data = await fetchByteArray(url);
     console.log('Data downloaded:', data);
@@ -83,6 +83,8 @@ const extract = async (url: string): Promise<IFileData[]> => {
     return [];
   }
 };
+
+export * from './types';
 
 export default {
   extract,
