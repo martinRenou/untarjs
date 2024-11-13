@@ -16,7 +16,7 @@ export interface IUnpackJSAPI {
   extract: (url: string) => Promise<IFileData[]>;
 }
 
-export const initUntarJS = async (wasmPath: string | undefined): Promise<IUnpackJSAPI> => {
+export const initUntarJS = async (wasmPath?: string): Promise<IUnpackJSAPI> => {
   let wasmModule: IWasmModule | undefined = undefined;
   try {
     wasmModule = await initializeWasm(wasmPath);

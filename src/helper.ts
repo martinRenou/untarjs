@@ -1,12 +1,11 @@
 import unpack, { IWasmModule } from './unpack';
-import unpackWasm from './unpack.wasm';
 
 const initializeWasm = async (wasmPath: string | undefined): Promise<IWasmModule> => {
   try {
     const wasmModule: IWasmModule = await unpack({
       locateFile(path: string) {
         if (path.endsWith('.wasm')) {
-          return wasmPath ? wasmPath : unpackWasm;
+          return wasmPath ? wasmPath : 'unpack.wasm';
         }
         return path;
       }
@@ -17,4 +16,5 @@ const initializeWasm = async (wasmPath: string | undefined): Promise<IWasmModule
     throw new Error(`Error initializing the WASM module: ${err}`);
   }
 };
+
 export default initializeWasm;

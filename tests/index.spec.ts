@@ -1,4 +1,4 @@
-import untarjs from '../src/index';
+import { initUntarJS } from '../src/index';
 
 jest.mock('../src/helper', () => ({
   __esModule: true,
@@ -14,6 +14,8 @@ jest.mock('../src/index', () => {
 
 describe('extract', () => {
   it('should download and extract data successfully', async () => {
+    const untarjs = await initUntarJS();
+
     const mockData = new Uint8Array([1, 2, 3, 4]);
     const extractedData = {
       data: new Uint8Array([5, 6, 7, 8]),
