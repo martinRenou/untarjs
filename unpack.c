@@ -27,8 +27,8 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
 
     ExtractedArchive* result = (ExtractedArchive*)malloc(sizeof(ExtractedArchive));
     if (!result) {
-
-        fprintf(stderr, "Memory allocation error for ExtractedArchive.\n");
+        result->status = 0;
+        result->error_message = strdup("Memory allocation error for ExtractedArchive.");   
         return NULL;
     }
 
@@ -47,7 +47,6 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
         result->error_message = strdup(archive_error_string(archive));
         return result;
     }
-    result->status = 1;
 
     while (archive_read_next_header(archive, &entry) == ARCHIVE_OK) {
         const char* filename = archive_entry_pathname(entry);
@@ -56,7 +55,6 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
 
         files = realloc(files, sizeof(FileData) * (files_count + 1));
         if (!files) {
-            fprintf(stderr, "Memory allocation error for FileData array.\n");
             archive_read_free(archive);
             result->status = 0;
             result->error_message = strdup("Memory allocation error for FileData array.");
@@ -65,7 +63,6 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
 
         files[files_count].filename = strdup(filename);
         files[files_count].data = malloc(entrySize);
-        printf("Setting data_size for file: %s, size: %zu\n", filename, entrySize);
         files[files_count].data_size = entrySize;
 
         if (!files[files_count].data) {
@@ -91,7 +88,6 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
                 return result;
             }
             bytesRead += ret;
-            printf("Read %zd bytes for file: %s\n", ret, filename);
         }
         files_count++;
     }
