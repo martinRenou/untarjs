@@ -5,7 +5,7 @@ set -e
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ENV_FOLDER="wasm-unpack-env"
 LIBS_FOLDER="libs"
-WASM_LIB="lib"
+WASM_LIB="src"
 
 if [ -d "$ENV_FOLDER" ]; then
     echo "Folder '$ENV_FOLDER' already exists."
@@ -62,7 +62,7 @@ if true; then
             --yes \
             zlib bzip2 zstd libiconv libarchive "emscripten-abi=3.1.45"
 fi
-   
+
 export PREFIX=$PREFIX_DIR
 export CPPFLAGS="-I$PREFIX/include"
 export LDFLAGS="-L$PREFIX/lib"
@@ -71,14 +71,6 @@ export LDLIBS="-lbz2 -lz -lzstd"
 cd $THIS_DIR
 
 echo "Start of compiling unpack.c"
-
-if [ -d "$WASM_LIB" ]; then
-    echo "Folder '$WASM_LIB' already exists."
-else
-    echo "Folder '$WASM_LIB' does not exist. Creating it now..."
-    mkdir "$WASM_LIB"
-    echo "Folder '$WASM_LIB' created."
-fi
 
 emcc unpack.c -o $WASM_LIB/unpack.js \
     $CPPFLAGS $LDFLAGS \

@@ -4,6 +4,7 @@ const initializeWasm = async (wasmPath: string | undefined): Promise<IWasmModule
   try {
     const wasmModule: IWasmModule = await unpack({
       locateFile(path: string) {
+        console.log('locating file', path)
         if (path.endsWith('.wasm')) {
           return wasmPath ? wasmPath : 'unpack.wasm';
         }

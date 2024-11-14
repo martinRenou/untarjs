@@ -5,16 +5,18 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build:wasm": "node build_wasm.js",
+    "build:wasm": "node build_wasm.cjs",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "build": "yarn run clean && tsc && yarn run build:wasm",
-    "build:prod": "yarn run clean && tsc && yarn run build:wasm",
+    "build": "yarn run clean && yarn run build:wasm && yarn run build:lib",
+    "build:lib": "tsc && copyfiles -u 1 \"src/**/*.{js,wasm}\" lib",
+    "build:prod": "yarn run build",
     "prettier": "prettier --list-different --write \"src/**/*.ts\"",
     "prettier:check": "prettier --check \"src/**/*.ts\"",
     "eslint": "eslint --ext .ts --fix .",
     "eslint:check": "eslint --ext .ts.",
     "test": "jest"
   },
+  "type": "module",
   "files": [
     "lib/"
   ],
@@ -44,11 +46,15 @@
     "url": "^0.11.4"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.13.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.8.1",
     "@typescript-eslint/eslint-plugin": "~6.13.2",
     "@typescript-eslint/parser": "~6.13.2",
+    "babel-jest": "^29.7.0",
+    "copyfiles": "^2.4.1",
     "eslint": "~8.55.0",
     "eslint-config-prettier": "~9.1.0",
     "eslint-plugin-jest": "~27.6.0",
