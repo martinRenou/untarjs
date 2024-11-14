@@ -27,33 +27,34 @@ export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
     console.error('WASM module not initialized.');
     return [];
   }
+
   const inputPtr = wasmModule._malloc(data.length);
   wasmModule.HEAPU8.set(data, inputPtr);
   const fileCountPtr = wasmModule._malloc(4);
-  const outputSizePtr = wasmModule._malloc(4);
 
   try {
-    const extractedFilesPtr = wasmModule._extract_archive(
-      inputPtr,
-      data.length,
-      outputSizePtr,
-      fileCountPtr
-    );
+    const resultPtr = wasmModule._extract_archive(inputPtr, data.length, fileCountPtr);
+    const statusPtr = wasmModule.getValue(resultPtr+8, 'i32');
+    const errorMessagePtr = wasmModule.getValue(resultPtr + 12, 'i32');
+    console.log('status', statusPtr);
+    console.log('errorMessagePtr', errorMessagePtr);
+    if (statusPtr !== 1) {
+      const errorMessage = wasmModule.UTF8ToString(errorMessagePtr);
+      console.error('Extraction failed with status:', statusPtr, 'Error:', errorMessage);
+      return [];
+    }
+    const filesPtr = wasmModule.getValue(resultPtr, 'i32'); 
+    const fileCount = wasmModule.getValue(resultPtr + 4, 'i32');
 
-    const fileCount = wasmModule.getValue(fileCountPtr, 'i32');
     const files: IFileData[] = [];
 
     for (let i = 0; i < fileCount; i++) {
-      const fileDataPtr = extractedFilesPtr + i * (3 * 4);
+      const fileDataPtr = filesPtr + i * 12;
       const filenamePtr = wasmModule.getValue(fileDataPtr, 'i32');
       const dataSize = wasmModule.getValue(fileDataPtr + 8, 'i32');
       const dataPtr = wasmModule.getValue(fileDataPtr + 4, 'i32');
       const filename = wasmModule.UTF8ToString(filenamePtr);
-      const fileData = new Uint8Array(
-        wasmModule.HEAPU8.buffer,
-        dataPtr,
-        dataSize
-      );
+      const fileData = new Uint8Array(wasmModule.HEAPU8.buffer, dataPtr, dataSize);
 
       files.push({
         filename: filename,
@@ -61,17 +62,19 @@ export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
       });
     }
 
-    wasmModule._free(fileCountPtr);
-    wasmModule._free(outputSizePtr);
     wasmModule._free(inputPtr);
-    wasmModule._free(extractedFilesPtr);
+    wasmModule._free(fileCountPtr);
+    wasmModule._free(statusPtr);
+    wasmModule._free(errorMessagePtr);
+    wasmModule._free(resultPtr);
 
     return files;
   } catch (error) {
-    console.error('Error during extracting:', error);
+    console.error('Error during extraction:', error);
     return [];
   }
 };
+
 
 export const extract = async (url: string): Promise<IFileData[]> => {
   try {
