@@ -144,6 +144,5 @@ export * from './types';
 
 export default {
   extract,
-  extractData,
-  init
+  extractData
 };
