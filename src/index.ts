@@ -11,7 +11,7 @@ const fetchByteArray = async (url: string): Promise<Uint8Array> => {
   return new Uint8Array(arrayBuffer);
 };
 
-const init = async (): Promise<IWasmModule | null> => {
+ const init = async (): Promise<IWasmModule | null> => {
   try {
     const wasmModule = await initializeWasm();
     return wasmModule as IWasmModule;
@@ -66,8 +66,6 @@ export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
     */
     const statusPtr = wasmModule.getValue(resultPtr + 8, 'i32');
     const errorMessagePtr = wasmModule.getValue(resultPtr + 12, 'i32');
-    console.log('status', statusPtr);
-    console.log('errorMessagePtr', errorMessagePtr);
     if (statusPtr !== 1) {
       const errorMessage = wasmModule.UTF8ToString(errorMessagePtr);
       console.error(
@@ -121,7 +119,6 @@ export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
 
     wasmModule._free(inputPtr);
     wasmModule._free(fileCountPtr);
-    wasmModule._free(statusPtr);
     wasmModule._free(errorMessagePtr);
     wasmModule._free(resultPtr);
 
@@ -135,13 +132,13 @@ export const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
 export const extract = async (url: string): Promise<IFileData[]> => {
   try {
     const data = await fetchByteArray(url);
-    console.log('Data downloaded:', data);
     return await extractData(data);
   } catch (error) {
     console.error('Error during extracting:', error);
     return [];
   }
 };
+
 
 export * from './types';
 
