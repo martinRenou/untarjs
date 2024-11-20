@@ -1,10 +1,5 @@
 import initializeWasm from './helper';
-import { IFileData } from './types';
-
-export interface IUnpackJSAPI {
-  extractData: (data: Uint8Array) => Promise<IFileData[]>;
-  extract: (url: string) => Promise<IFileData[]>;
-}
+import { IFileData, IUnpackJSAPI } from './types';
 
 const fetchByteArray = async (url: string): Promise<Uint8Array> => {
   const response = await fetch(url);
