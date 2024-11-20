@@ -12,8 +12,6 @@ const initializeWasm = async (): Promise<IWasmModule | undefined> => {
       }
     });
 
-    console.log('WASM module initialized:', wasmModule);
-
     return wasmModule;
   } catch (err) {
     console.error('Error initializing the WASM module:', err);
