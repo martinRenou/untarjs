@@ -18,7 +18,9 @@ This package has 2 methods:
 
 The example of using:
 ```sh
-import untarjs from "@emscripten-forge/untarjs";
+import { initUntarJS } from "@emscripten-forge/untarjs";
+
+const untarjs = await initUntarJS();
 
 const condaPackageUrl = 'https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2';
 untarjs.extract(condaPackageUrl).then((files)=>{
