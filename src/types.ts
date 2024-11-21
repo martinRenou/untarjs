@@ -1,4 +1,4 @@
-export type FilesData = {[key: string]: Uint8Array};
+export type FilesData = {[filename: string]: Uint8Array};
 
 export interface IUnpackJSAPI {
   extractData: (data: Uint8Array) => Promise<FilesData>;
