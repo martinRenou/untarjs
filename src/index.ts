@@ -13,7 +13,7 @@ const fetchByteArray = async (url: string): Promise<Uint8Array> => {
 export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
   const wasmModule = await initializeWasm();
 
-  const extractData = async (data: Uint8Array): Promise<FilesData> => {
+  const extractData = (data: Uint8Array): FilesData => {
     /**Since WebAssembly, memory is accessed using pointers
       and the first parameter of extract_archive method from unpack.c, which is Uint8Array of file data, should be a pointer
       so we have to allocate memory for file data
