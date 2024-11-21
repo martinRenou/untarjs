@@ -1,9 +1,6 @@
-export interface IFileData {
-  filename: string;
-  data: Uint8Array;
-}
+export type FilesData = {[key: string]: Uint8Array};
 
 export interface IUnpackJSAPI {
-  extractData: (data: Uint8Array) => Promise<IFileData[]>;
-  extract: (url: string) => Promise<IFileData[]>;
+  extractData: (data: Uint8Array) => Promise<FilesData>;
+  extract: (url: string) => Promise<FilesData>;
 }

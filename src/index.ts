@@ -1,5 +1,5 @@
 import initializeWasm from './helper';
-import { IFileData, IUnpackJSAPI } from './types';
+import { FilesData, IUnpackJSAPI } from './types';
 
 const fetchByteArray = async (url: string): Promise<Uint8Array> => {
   const response = await fetch(url);
@@ -13,7 +13,7 @@ const fetchByteArray = async (url: string): Promise<Uint8Array> => {
 export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
   const wasmModule = await initializeWasm();
 
-  const extractData = async (data: Uint8Array): Promise<IFileData[]> => {
+  const extractData = async (data: Uint8Array): Promise<FilesData> => {
     /**Since WebAssembly, memory is accessed using pointers
       and the first parameter of extract_archive method from unpack.c, which is Uint8Array of file data, should be a pointer
       so we have to allocate memory for file data
@@ -60,12 +60,12 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
           'Error:',
           errorMessage
         );
-        return [];
+        return {};
       }
       const filesPtr = wasmModule.getValue(resultPtr, 'i32');
       const fileCount = wasmModule.getValue(resultPtr + 4, 'i32');
 
-      const files: IFileData[] = [];
+      const files: FilesData = {};
 
       /**
        * FilesPtr is a pointer that refers to an instance of the FileData in unpack.c
@@ -97,10 +97,7 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
           dataSize
         );
 
-        files.push({
-          filename: filename,
-          data: fileData
-        });
+        files[filename] = fileData;
       }
 
       wasmModule._free(inputPtr);
@@ -111,17 +108,17 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
       return files;
     } catch (error) {
       console.error('Error during extraction:', error);
-      return [];
+      return {};
     }
   };
 
-  const extract = async (url: string): Promise<IFileData[]> => {
+  const extract = async (url: string): Promise<FilesData> => {
     try {
       const data = await fetchByteArray(url);
       return await extractData(data);
     } catch (error) {
       console.error('Error during extracting:', error);
-      return [];
+      return {};
     }
   }
 
