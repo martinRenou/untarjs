@@ -13,18 +13,18 @@ const fetchByteArray = async (url: string): Promise<Uint8Array> => {
 export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
   const wasmModule = await initializeWasm();
 
-  const extractData = (data: Uint8Array): FilesData => {
+  const extractData = async (data: Uint8Array): Promise<FilesData> => {
     /**Since WebAssembly, memory is accessed using pointers
       and the first parameter of extract_archive method from unpack.c, which is Uint8Array of file data, should be a pointer
       so we have to allocate memory for file data
     **/
-    const inputPtr = wasmModule._malloc(data.length);
+    let inputPtr: number | null = wasmModule._malloc(data.length);
     wasmModule.HEAPU8.set(data, inputPtr);
 
     // fileCountPtr is the pointer to 4 bytes of memory in WebAssembly's heap that holds fileCount value from the ExtractedArchive structure in unpack.c.
-    const fileCountPtr = wasmModule._malloc(4);
+    let fileCountPtr: number | null = wasmModule._malloc(4);
 
-    const resultPtr = wasmModule._extract_archive(
+    let resultPtr: number | null = wasmModule._extract_archive(
       inputPtr,
       data.length,
       fileCountPtr
@@ -49,8 +49,8 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
       and in order to get pointer of statusPtr we need to calculate it as: 0(offset of file pointer) + 4 (offset of fileCount) + 4 (offset for status)
       'status' field and pointer of `error_message` are 32-bit signed integer
     */
-    const statusPtr = wasmModule.getValue(resultPtr + 8, 'i32');
-    const errorMessagePtr = wasmModule.getValue(resultPtr + 12, 'i32');
+    let statusPtr: number | null = wasmModule.getValue(resultPtr + 8, 'i32');
+    let errorMessagePtr: number | null = resultPtr + 12;
     if (statusPtr !== 1) {
       const errorMessage = wasmModule.UTF8ToString(errorMessagePtr);
       console.error(
@@ -59,7 +59,14 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
         'Error:',
         errorMessage
       );
-      return {};
+      wasmModule._free(inputPtr);
+      wasmModule._free(fileCountPtr);
+      wasmModule._free_extracted_archive(resultPtr);
+      inputPtr = null;
+      fileCountPtr = null;
+      resultPtr = null;
+      errorMessagePtr = null;
+      throw new Error(errorMessage);
     }
     const filesPtr = wasmModule.getValue(resultPtr, 'i32');
     const fileCount = wasmModule.getValue(resultPtr + 4, 'i32');
@@ -95,15 +102,19 @@ export const initUntarJS = async (): Promise<IUnpackJSAPI> => {
         dataPtr,
         dataSize
       );
+      
+      const fileDataCopy = fileData.slice(0);
 
-      files[filename] = fileData;
+      files[filename] = fileDataCopy;
     }
-
+  
     wasmModule._free(inputPtr);
     wasmModule._free(fileCountPtr);
-    wasmModule._free(errorMessagePtr);
-    wasmModule._free(resultPtr);
-
+    wasmModule._free_extracted_archive(resultPtr);
+    inputPtr = null;
+    fileCountPtr = null;
+    resultPtr = null;
+    errorMessagePtr = null;
     return files;
   };
 
