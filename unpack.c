@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <archive.h>
 #include <archive_entry.h>
 #include <emscripten.h>
@@ -18,8 +19,9 @@ typedef struct {
     char error_message[256];
 } ExtractedArchive;
 
+
 EMSCRIPTEN_KEEPALIVE
-ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* fileCount) {
+ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* fileCount, bool decompressionOnly ) {
     struct archive* archive;
     struct archive_entry* entry;
     FileData* files = NULL;
@@ -38,6 +40,9 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
     archive = archive_read_new();
     archive_read_support_filter_all(archive);
     archive_read_support_format_all(archive);
+    if (decompressionOnly) {
+        archive_read_support_format_raw(archive);
+    }
 
     if (archive_read_open_memory(archive, inputData, inputSize) != ARCHIVE_OK) {
         result->status = 0;
@@ -47,10 +52,8 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
     }
 
     while (archive_read_next_header(archive, &entry) == ARCHIVE_OK) {
-        const char* filename = archive_entry_pathname(entry);
-        size_t entrySize = archive_entry_size(entry);
-
-   
+        const char* filename =  decompressionOnly ? "decompression.json": archive_entry_pathname(entry);
+        size_t entrySize = decompressionOnly ? inputSize: archive_entry_size(entry);
         files= realloc(files, sizeof(FileData) * (files_count + 1));
         if (!files) {
             archive_read_free(archive);
@@ -95,7 +98,6 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize, size_t* 
     result->status = 1;
     return result;
 }
-
 
 EMSCRIPTEN_KEEPALIVE
 void free_extracted_archive(ExtractedArchive* archive) {
