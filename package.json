@@ -1,6 +1,6 @@
 {
   "name": "@emscripten-forge/untarjs",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "A simple project to unzip .zip, .tar.bz2 and .conda files in the front-end",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
