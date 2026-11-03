@@ -1,8 +1,17 @@
-export type FilesData = { [filename: string]: Uint8Array };
+export interface IFileData {
+  content: Uint8Array | undefined;
+  ctime: string;
+  mtime: string;
+  size?: number;
+}
+
+export type FilesData = { [filename: string]: IFileData };
 
 export interface ExtractedFileChunk {
   path: string;
   size: number;
+  ctime: string;
+  mtime: string;
   offset: number;
   data: Uint8Array;
   final: boolean;

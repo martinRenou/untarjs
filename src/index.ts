@@ -3,6 +3,14 @@ import { ExtractedFileChunk, FilesData, IUnpackJSAPI } from './types';
 
 const STREAM_CHUNK_SIZE = 256 * 1024;
 
+const toIsoTimestamp = (seconds: number, isSet: boolean): string => {
+  if (!isSet || !Number.isFinite(seconds)) {
+    return '';
+  }
+  const date = new Date(seconds * 1000);
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString();
+};
+
 export const fetchByteArray = async (url: string): Promise<Uint8Array> => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -69,35 +77,27 @@ export const initUntarJS = async (locateWasm?: (file: string) => string): Promis
       errorMessagePtr = null;
       throw new Error(errorMessage);
     }
-    const filesPtr = wasmModule.getValue(resultPtr, 'i32');
     const fileCount = wasmModule.getValue(resultPtr + 4, 'i32');
     const wasmHeap = new Uint8Array(wasmModule.wasmMemory.buffer);
 
-    /**
-     * FilesPtr is a pointer that refers to an instance of the FileData in unpack.c
-        typedef struct {
-          char* filename;
-          uint8_t* data;
-          size_t data_size;
-        } FileData;
-
-      and its fields are laid out in memory sequentially too so each field take 4 bytes:
-
-          4 bytes        4 bytes         4 bytes
-      ---------------|---------------|---------------
-    filename            data         data_size
-
-    `filesPtr + i * 12` calculates the memory address of the i-th FileData element in the array
-      where `12` is the size of each FileData structure in memory in bytes: 4 + 4 + 4
-    */
-
     for (let i = 0; i < fileCount; i++) {
-      const fileDataPtr = filesPtr + i * 12;
-      const filenamePtr = wasmModule.getValue(fileDataPtr, 'i32');
-      const dataSize = wasmModule.getValue(fileDataPtr + 8, 'i32');
-      const dataPtr = wasmModule.getValue(fileDataPtr + 4, 'i32');
+      const filenamePtr = wasmModule._extracted_file_name(resultPtr, i);
+      const dataSize = wasmModule._extracted_file_size(resultPtr, i);
+      const dataPtr = wasmModule._extracted_file_data(resultPtr, i);
       const filename = wasmModule.UTF8ToString(filenamePtr);
-      files[filename] = wasmHeap.slice(dataPtr, dataPtr + dataSize);
+      const timeFlags = wasmModule._extracted_file_time_flags(resultPtr, i);
+      files[filename] = {
+        content: wasmHeap.slice(dataPtr, dataPtr + dataSize),
+        ctime: toIsoTimestamp(
+          wasmModule._extracted_file_ctime(resultPtr, i),
+          (timeFlags & 2) !== 0
+        ),
+        mtime: toIsoTimestamp(
+          wasmModule._extracted_file_mtime(resultPtr, i),
+          (timeFlags & 1) !== 0
+        ),
+        size: dataSize
+      };
     }
 
     wasmModule._free(inputPtr);
@@ -158,6 +158,15 @@ export const initUntarJS = async (locateWasm?: (file: string) => string): Promis
             wasmModule._archive_stream_entry_path(streamPtr)
           );
           const size = wasmModule._archive_stream_entry_size(streamPtr);
+          const timeFlags = wasmModule._archive_stream_entry_time_flags(streamPtr);
+          const ctime = toIsoTimestamp(
+            wasmModule._archive_stream_entry_ctime(streamPtr),
+            (timeFlags & 2) !== 0
+          );
+          const mtime = toIsoTimestamp(
+            wasmModule._archive_stream_entry_mtime(streamPtr),
+            (timeFlags & 1) !== 0
+          );
           let offset = 0;
           let bytesRead = wasmModule._archive_stream_read(
             streamPtr,
@@ -169,7 +178,15 @@ export const initUntarJS = async (locateWasm?: (file: string) => string): Promis
             throw new Error(getStreamError());
           }
           if (bytesRead === 0) {
-            yield { path, size, offset, data: new Uint8Array(0), final: true };
+            yield {
+              path,
+              size,
+              ctime,
+              mtime,
+              offset,
+              data: new Uint8Array(0),
+              final: true
+            };
           }
 
           while (bytesRead > 0) {
@@ -185,13 +202,15 @@ export const initUntarJS = async (locateWasm?: (file: string) => string): Promis
             );
 
             if (nextBytesRead < 0) {
-              yield { path, size, offset, data: chunk, final: false };
+              yield { path, size, ctime, mtime, offset, data: chunk, final: false };
               throw new Error(getStreamError());
             }
 
             yield {
               path,
               size,
+              ctime,
+              mtime,
               offset,
               data: chunk,
               final: nextBytesRead === 0

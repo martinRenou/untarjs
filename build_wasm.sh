@@ -88,6 +88,6 @@ emcc unpack.c -o $WASM_LIB/unpack.js \
     -s INITIAL_MEMORY=16MB \
     -s ENVIRONMENT=web,node \
     -s EXPORTED_RUNTIME_METHODS='["ccall", "cwrap", "getValue", "UTF8ToString", "wasmMemory"]' \
-    -s EXPORTED_FUNCTIONS="['_extract', '_free_extracted_archive', '_malloc', '_free', '_archive_stream_open', '_archive_stream_next_entry', '_archive_stream_entry_path', '_archive_stream_entry_size', '_archive_stream_read', '_archive_stream_error', '_archive_stream_close']"
+    -s EXPORTED_FUNCTIONS="['_extract', '_free_extracted_archive', '_malloc', '_free', '_archive_stream_open', '_archive_stream_next_entry', '_archive_stream_entry_path', '_archive_stream_entry_size', '_archive_stream_entry_time_flags', '_archive_stream_entry_mtime', '_archive_stream_entry_ctime', '_archive_stream_read', '_archive_stream_error', '_archive_stream_close', '_extracted_file_time_flags', '_extracted_file_name', '_extracted_file_data', '_extracted_file_size', '_extracted_file_mtime', '_extracted_file_ctime']"
 
 echo "Build completed successfully!"

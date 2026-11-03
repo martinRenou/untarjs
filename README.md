@@ -10,8 +10,13 @@ This package has 4 methods:
 - extract(url) - downloads an archive through the url and returns extracted data as an object representing the file structure:
 ```
 {
-    "file1": Uint8Array
-    "info/paths.json":  Uint8Array,
+    "file1": {
+        content: Uint8Array,
+        ctime: string,
+        mtime: string,
+        size: number
+    },
+    "info/paths.json": { ... },
     ...
 }
 ```
@@ -19,7 +24,7 @@ This package has 4 methods:
 - extractStream(url) - downloads an archive and returns an async iterable of extracted file chunks.
 - extractDataStream(data) - accepts Uint8Array archive data and returns an async iterable of extracted file chunks.
 
-Each chunk has `path`, `size`, `offset`, `data` (a Uint8Array of at most 256 KiB), and `final` (true for the last chunk of that file). For example:
+Each chunk has `path`, `size`, `ctime`, `mtime`, `offset`, `data` (a Uint8Array of at most 256 KiB), and `final` (true for the last chunk of that file). For example:
 
 ```js
 for await (const chunk of untarjs.extractStream(condaPackageUrl)) {

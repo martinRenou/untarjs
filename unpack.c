@@ -11,6 +11,9 @@ typedef struct {
     char* filename;
     uint8_t* data;
     size_t data_size;
+    double mtime;
+    double ctime;
+    uint32_t time_flags;
 } FileData;
 
 typedef struct {
@@ -136,6 +139,13 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize ) {
         files[files_count].filename = strdup(filename);
         files[files_count].data = malloc(entrySize);
         files[files_count].data_size = entrySize;
+        files[files_count].mtime = (double)archive_entry_mtime(entry) +
+            (double)archive_entry_mtime_nsec(entry) / 1000000000.0;
+        files[files_count].ctime = (double)archive_entry_ctime(entry) +
+            (double)archive_entry_ctime_nsec(entry) / 1000000000.0;
+        files[files_count].time_flags =
+            (archive_entry_mtime_is_set(entry) ? 1u : 0u) |
+            (archive_entry_ctime_is_set(entry) ? 2u : 0u);
 
         if (!files[files_count].data) {
             free(files[files_count].filename);
@@ -240,6 +250,9 @@ ExtractedArchive* extract_archive(uint8_t* inputData, size_t inputSize ) {
             files[files_count].data_size = resolved->data_size;
             files[files_count].data = malloc(resolved->data_size);
             memcpy(files[files_count].data, resolved->data, resolved->data_size);
+            files[files_count].mtime = resolved->mtime;
+            files[files_count].ctime = resolved->ctime;
+            files[files_count].time_flags = resolved->time_flags;
 
             files_count++;
         }
@@ -342,6 +355,9 @@ ExtractedArchive* decompression(uint8_t* inputData, size_t inputSize) {
         files[files_count].filename = strdup(filename);
         files[files_count].data = NULL;
         files[files_count].data_size = 0;
+        files[files_count].mtime = 0;
+        files[files_count].ctime = 0;
+        files[files_count].time_flags = 0;
 
         ssize_t ret;
 
@@ -462,6 +478,33 @@ uint32_t archive_stream_entry_size(ArchiveStream* stream) {
 }
 
 EMSCRIPTEN_KEEPALIVE
+uint32_t archive_stream_entry_time_flags(ArchiveStream* stream) {
+    if (!stream || !stream->entry) {
+        return 0;
+    }
+    return (archive_entry_mtime_is_set(stream->entry) ? 1u : 0u) |
+        (archive_entry_ctime_is_set(stream->entry) ? 2u : 0u);
+}
+
+EMSCRIPTEN_KEEPALIVE
+double archive_stream_entry_mtime(ArchiveStream* stream) {
+    if (!stream || !stream->entry) {
+        return 0;
+    }
+    return (double)archive_entry_mtime(stream->entry) +
+        (double)archive_entry_mtime_nsec(stream->entry) / 1000000000.0;
+}
+
+EMSCRIPTEN_KEEPALIVE
+double archive_stream_entry_ctime(ArchiveStream* stream) {
+    if (!stream || !stream->entry) {
+        return 0;
+    }
+    return (double)archive_entry_ctime(stream->entry) +
+        (double)archive_entry_ctime_nsec(stream->entry) / 1000000000.0;
+}
+
+EMSCRIPTEN_KEEPALIVE
 ssize_t archive_stream_read(ArchiveStream* stream, uint8_t* output, size_t outputSize) {
     if (!stream || !stream->archive || !stream->entry) {
         return -1;
@@ -514,4 +557,52 @@ void free_extracted_archive(ExtractedArchive* archive) {
     }
     free(archive->files);
     free(archive);
+}
+
+EMSCRIPTEN_KEEPALIVE
+uint32_t extracted_file_time_flags(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return 0;
+    }
+    return archive->files[index].time_flags;
+}
+
+EMSCRIPTEN_KEEPALIVE
+const char* extracted_file_name(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return NULL;
+    }
+    return archive->files[index].filename;
+}
+
+EMSCRIPTEN_KEEPALIVE
+uint8_t* extracted_file_data(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return NULL;
+    }
+    return archive->files[index].data;
+}
+
+EMSCRIPTEN_KEEPALIVE
+uint32_t extracted_file_size(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return 0;
+    }
+    return (uint32_t)archive->files[index].data_size;
+}
+
+EMSCRIPTEN_KEEPALIVE
+double extracted_file_mtime(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return 0;
+    }
+    return archive->files[index].mtime;
+}
+
+EMSCRIPTEN_KEEPALIVE
+double extracted_file_ctime(ExtractedArchive* archive, size_t index) {
+    if (!archive || index >= archive->fileCount) {
+        return 0;
+    }
+    return archive->files[index].ctime;
 }
